@@ -1,50 +1,26 @@
 <script setup lang="ts">
-const name = $ref('')
+const WIDTH = 10;
+const HEIGHT = 10;
 
-const router = useRouter()
-const go = () => {
-  if (name)
-    router.push(`/hi/${encodeURIComponent(name)}`)
+// Array.from 接受的第一个参数是一个 具有 length 属性的对象
+const state = reactive(Array.from({ length: HEIGHT }, (_, y) => Array.from({ length: WIDTH }, (_, x) => y * 10 + x + 1
+)
+));
+
+const onClick = (x: number, y: number) => {
+  console.log(`Clicked at ${x}, ${y}`);
 }
 </script>
 
 <template>
   <div>
-    <div i-carbon-campsite text-4xl inline-block />
-    <p>
-      <a rel="noreferrer" href="https://github.com/antfu/vitesse-lite" target="_blank">
-        Vitesse Lite
-      </a>
-    </p>
-    <p>
-      <em text-sm op75>Opinionated Vite Starter Template</em>
-    </p>
-
-    <div py-4 />
-
-    <input
-      id="input"
-      v-model="name"
-      placeholder="What's your name?"
-      type="text"
-      autocomplete="false"
-      p="x-4 y-2"
-      w="250px"
-      text="center"
-      bg="transparent"
-      border="~ rounded gray-200 dark:gray-700"
-      outline="none active:none"
-      @keydown.enter="go"
-    >
-
+    Minesweeper
     <div>
-      <button
-        class="m-3 text-sm btn"
-        :disabled="!name"
-        @click="go"
-      >
-        Go
-      </button>
+      <div :key="y" v-for="(row, y) in state">
+        <button hover:bg-gray w-10 h-10 border :key="x" v-for="(item, x) in row" @click="onClick(x, y)">
+          {{ item }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
