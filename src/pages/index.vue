@@ -1,10 +1,10 @@
 <script setup lang="ts">
 
 // 引入扫雷块 接口
-import { BlockState } from '~/types'
+import { BlockState } from '~/types';
 
-// 标记是否当前开发模式
-let dev = false;
+// 引入 扫雷块 组件
+import MineBlock from '~/components/MineBlock.vue';
 
 // 标识是否已经生成炸弹分布
 let mineGenerated = false;
@@ -101,28 +101,6 @@ const onClick = (block: BlockState) => {
   expandZero(block);
 }
 
-const getBlockClass = (block: BlockState) => {
-  if (block.flagged) {
-    return 'bg-gray-500/10';
-  }
-  if (!block.revealed) {
-    return 'bg-gray-500/10 hover:bg-gray-500/20';
-  }
-  return block.mine ? 'bg-red-500/50' : numberColors[block.adjacentMines];
-}
-
-const numberColors = [
-  "text-transparent",
-  "text-blue-500",
-  "text-green-500",
-  "text-yellow-500",
-  "text-orange-500",
-  "text-red-500",
-  "text-purple-500",
-  "text-pink-500",
-  "text-teal-500"
-];
-
 // 当点开的 块 一个炸弹都没有时 把周围不是炸弹的通通翻转
 const expandZero = (block: BlockState) => {
   if (block.adjacentMines || block.mine) {
@@ -180,19 +158,8 @@ function checkGameState() {
     Minesweeper
     <div p5>
       <div :key="y" v-for="(row, y) in state" flex="~" items-center justify-center>
-        <button w-10 h-10 m="0.5" :key="x" v-for="(block, x) in row" border="1 gray-400/10" @click="onClick(block)"
-          @contextmenu.prevent="onRightClick(block)" :class=getBlockClass(block) flex="~" items-center justify-center>
-          <template v-if="block.flagged">
-            <div i-mdi-flag text-red></div>
-          </template>
-          <template v-else-if="block.revealed || dev">
-            <div v-if="block.mine" i-mdi-mine>
-            </div>
-            <div v-else>
-              {{ block.adjacentMines }}
-            </div>
-          </template>
-        </button>
+        <mine-block :block="block" :key="x" v-for="(block, x) in row" @click="onClick(block)"
+          @contextmenu.prevent="onRightClick(block)"></mine-block>
       </div>
     </div>
   </div>
