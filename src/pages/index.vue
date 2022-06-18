@@ -96,8 +96,8 @@ const updateNumbers = () => {
 }
 
 const onClick = (block: BlockState) => {
-  // 如果已经插旗子 不允许点开
-  if (block.flagged) {
+  // 如果已经插旗子 或者 已经点开 不允许点开
+  if (block.flagged || block.revealed) {
     return;
   }
   // 为了防止用户 刚开始就点出炸弹 设计 在第一次点下之后 才生成 炸弹分布
@@ -140,7 +140,7 @@ const expandZero = (block: BlockState) => {
     return;
   }
   getSiblings(block).forEach((b) => {
-    if (!b.revealed) {
+    if (!b.revealed && !b.flagged) {
       b.revealed = true;
       expandZero(b);
     }
@@ -154,6 +154,34 @@ const onRightClick = (block: BlockState) => {
     return;
   }
   block.flagged = !block.flagged;
+}
+
+watchEffect(checkGameState);
+
+// 判断是否胜利
+function checkGameState() {
+
+  // 二维数组扁平化
+  const blocks = state.flat();
+
+  let cheatState = blocks.every((block) => block.flagged);
+
+  if (cheatState) {
+    alert('You cheat!');
+  }
+
+  let gameState = true;
+
+  blocks.forEach((block) => {
+    // 判断 剩下的没翻开的块 如果有一块 不是炸弹 那就说明没有赢
+    if (!block.revealed && !block.mine) {
+      gameState = false;
+    }
+  })
+
+  if (gameState) {
+    alert("You Win!");
+  }
 }
 
 </script>
