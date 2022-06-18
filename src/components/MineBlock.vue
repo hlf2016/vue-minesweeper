@@ -3,7 +3,7 @@
     <template v-if="block.flagged">
       <div i-mdi-flag text-red></div>
     </template>
-    <template v-else-if="block.revealed">
+    <template v-else-if="block.revealed || isDev">
       <div v-if="block.mine" i-mdi-mine>
       </div>
       <div v-else>
@@ -15,7 +15,9 @@
 
 <script setup lang="ts">
 
-import { BlockState } from '~/types';
+import type { BlockState } from '~/types';
+
+import { isDev } from '~/composables';
 
 defineProps<{ block: BlockState }>();
 

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 
 // 引入扫雷块 接口
-import { BlockState } from '~/types';
+import type { BlockState } from '~/types';
+
+import { isDev, toggleDev } from '~/composables'
 
 // 引入 扫雷块 组件
 import MineBlock from '~/components/MineBlock.vue';
@@ -156,6 +158,9 @@ function checkGameState() {
 <template>
   <div>
     Minesweeper
+    <button @click="toggleDev()">
+      {{ isDev }}
+    </button>
     <div p5>
       <div :key="y" v-for="(row, y) in state" flex="~" items-center justify-center>
         <mine-block :block="block" :key="x" v-for="(block, x) in row" @click="onClick(block)"
