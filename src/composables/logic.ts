@@ -1,13 +1,15 @@
 import type { BlockState } from '~/types'
 
+export interface GameState {
+  board: BlockState[][]
+  mineGenerated: boolean
+  gameState: 'playing' | 'lost' | 'won'
+}
+
 export class GamePlay {
   // Array.from 接受的第一个参数是一个 具有 length 属性的对象
   // reactive 无法实现整体替换 这里为了实现 重置 扫雷 改用 ref 实现
-  state = ref<BlockState[][]>([])
-  // 标识是否已经生成炸弹分布
-  mineGenerated = false
-  // 游戏状态 play 、won 、lost
-  gameState = ref<'play' | 'won' | 'lost'>('play')
+  state = ref({} as GameState)
 
   // 排列组合当前块周围的所有方向
   directions = [
@@ -30,19 +32,24 @@ export class GamePlay {
   }
 
   reset() {
-    this.gameState.value = 'play'
-    this.mineGenerated = false
-    this.state.value = Array.from({ length: this.height }, (_, y) =>
-      Array.from({ length: this.width }, (_, x): BlockState => ({
-        x, y, adjacentMines: 0, revealed: false,
-      }),
+    this.state.value = {
+      // 标识是否已经生成炸弹分布
+      mineGenerated: false,
+      // 游戏状态 play 、won 、lost
+      gameState: 'playing',
+      board: Array.from({ length: this.height }, (_, y) =>
+        Array.from({ length: this.width }, (_, x): BlockState => ({
+          x, y, adjacentMines: 0, revealed: false,
+        }),
+        ),
       ),
-    )
+
+    }
   }
 
   // 生成炸弹
   generateMines(initBlock: BlockState) {
-    for (const row of this.state.value) {
+    for (const row of this.state.value.board) {
       for (const block of row) {
         // 将首次点击的 block 作为 初始化 block
         // 特性： 1.首次点击必然不是炸弹 2.周围的 block 也必然不是炸弹
@@ -69,13 +76,13 @@ export class GamePlay {
       if (x2 < 0 || y2 < 0 || x2 >= this.width || y2 >= this.height)
         return undefined
 
-      return this.state.value[y2][x2]
+      return this.state.value.board[y2][x2]
     }).filter(Boolean) as BlockState[]
   }
 
   // 计算非炸弹块的附近的炸弹块数目
   updateNumbers() {
-    this.state.value.forEach((row: BlockState[]) => {
+    this.state.value.board.forEach((row: BlockState[]) => {
       row.forEach((block) => {
         // 如果是炸弹块 则不计算
         if (block.mine)
@@ -90,20 +97,20 @@ export class GamePlay {
   }
 
   onClick(block: BlockState) {
-    if (this.gameState.value === 'lost')
+    if (this.state.value.gameState === 'lost')
       return
     // 如果已经插旗子 或者 已经点开 不允许点开
     if (block.flagged || block.revealed)
       return
 
     // 为了防止用户 刚开始就点出炸弹 设计 在第一次点下之后 才生成 炸弹分布
-    if (!this.mineGenerated) {
+    if (!this.state.value.mineGenerated) {
       this.generateMines(block)
-      this.mineGenerated = true
+      this.state.value.mineGenerated = true
     }
     block.revealed = true
     if (block.mine) {
-      this.gameState.value = 'lost'
+      this.state.value.gameState = 'lost'
       this.showAllMines()
       alert('BOOOM!')
     }
@@ -113,7 +120,7 @@ export class GamePlay {
 
   // 当点击到炸弹后 所有炸弹全部展示
   showAllMines() {
-    this.state.value.flat().forEach((block) => {
+    this.state.value.board.flat().forEach((block) => {
       if (block.mine && !block.revealed)
         block.revealed = true
     })
@@ -134,7 +141,7 @@ export class GamePlay {
 
   // 右键标记插旗子
   onRightClick(block: BlockState) {
-    if (this.gameState.value === 'lost')
+    if (this.state.value.gameState === 'lost')
       return
     // 如果已经翻开 不允许插旗子
     if (block.revealed)
@@ -146,12 +153,12 @@ export class GamePlay {
   // 判断是否胜利
   checkGamestate() {
     // 二维数组扁平化
-    const blocks = this.state.value.flat()
+    const blocks = this.state.value.board.flat()
 
     const cheatstate = blocks.every((block: BlockState) => block.flagged)
 
     if (cheatstate) {
-      this.gameState.value = 'lost'
+      this.state.value.gameState = 'lost'
       alert('You cheat!')
     }
 
@@ -164,7 +171,7 @@ export class GamePlay {
     })
 
     if (gamestate) {
-      this.gameState.value = 'won'
+      this.state.value.gameState = 'won'
       alert('You Win!')
     }
   }
