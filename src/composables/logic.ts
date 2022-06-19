@@ -23,12 +23,16 @@ export class GamePlay {
     [-1, 1],
   ]
 
-  constructor(public width: number, public height: number) {
+  constructor(public width: number, public height: number, public mines: number) {
     this.reset()
   }
 
   getState() {
     return this.state
+  }
+
+  get blocks() {
+    return this.state.value.board.flat()
   }
 
   reset() {
@@ -47,22 +51,38 @@ export class GamePlay {
     }
   }
 
+  // 生成随机 int 类型的数字
+  randomInt(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1)) + min
+  }
+
   // 生成炸弹
   generateMines(initBlock: BlockState) {
-    for (const row of this.state.value.board) {
-      for (const block of row) {
-        // 将首次点击的 block 作为 初始化 block
-        // 特性： 1.首次点击必然不是炸弹 2.周围的 block 也必然不是炸弹
-        if (Math.abs(initBlock.x - block.x) < 1)
-          continue
-
-        if (Math.abs(initBlock.y - block.y) < 1)
-          continue
-
-        // 每一个块 都是 n/10 的概率变成炸弹
-        block.mine = Math.random() < 0.3
-      }
+    const placeRandom = () => {
+      const x = this.randomInt(0, this.width - 1)
+      const y = this.randomInt(0, this.height - 1)
+      const block = this.state.value.board[y][x]
+      // 将首次点击的 block 作为 初始化 block
+      // 特性： 1.首次点击必然不是炸弹 2.周围的 block 也必然不是炸弹
+      if (Math.abs(initBlock.x - block.x) < 1)
+        return false
+      if (Math.abs(initBlock.y - block.y) < 1)
+        return false
+      // 防止 一个位置已经是炸弹 再次被生成炸弹 从而重复占位 浪费一个位置
+      if (block.mine)
+        return false
+      block.mine = true
+      return true
     }
+    // 算法优化 生成几个炸弹 我们说了算 增加随机的确定性
+    // 由我们来确定生成几个炸弹 并随机摆放相应的位置上 必须保证 一个炸弹一个坑
+    Array.from({ length: this.mines }, () => null).forEach(() => {
+      let isPlaceRandom = false
+      // 只有每次生成炸弹在不同的位置 才结束循环 防止两个炸弹一个坑
+      while (!isPlaceRandom)
+        isPlaceRandom = placeRandom()
+    })
+
     this.updateNumbers()
   }
 
