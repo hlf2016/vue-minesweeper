@@ -1,8 +1,13 @@
 import type { BlockState } from '~/types'
 
 export class GamePlay {
+  // Array.from 接受的第一个参数是一个 具有 length 属性的对象
+  // reactive 无法实现整体替换 这里为了实现 重置 扫雷 改用 ref 实现
+  state = ref<BlockState[][]>([])
   // 标识是否已经生成炸弹分布
   mineGenerated = false
+  // 游戏状态 play 、won 、lost
+  gameState = ref<'play' | 'won' | 'lost'>('play')
 
   // 排列组合当前块周围的所有方向
   directions = [
@@ -16,10 +21,6 @@ export class GamePlay {
     [-1, 1],
   ]
 
-  // Array.from 接受的第一个参数是一个 具有 length 属性的对象
-  // reactive 无法实现整体替换 这里为了实现 重置 扫雷 改用 ref 实现
-  state = ref<BlockState[][]>([])
-
   constructor(public width: number, public height: number) {
     this.reset()
   }
@@ -29,6 +30,7 @@ export class GamePlay {
   }
 
   reset() {
+    this.gameState.value = 'play'
     this.mineGenerated = false
     this.state.value = Array.from({ length: this.height }, (_, y) =>
       Array.from({ length: this.width }, (_, x): BlockState => ({
@@ -62,8 +64,8 @@ export class GamePlay {
     // [dx, dy] 在这里是解构
     return this.directions.map(([dx, dy]) => {
       // 计算周围八个方块中 一共有多少个是炸弹
-      const x2 = block.x + dx
-      const y2 = block.y + dy
+      const x2: number = block.x + dx
+      const y2: number = block.y + dy
       if (x2 < 0 || y2 < 0 || x2 >= this.width || y2 >= this.height)
         return undefined
 
@@ -88,6 +90,8 @@ export class GamePlay {
   }
 
   onClick(block: BlockState) {
+    if (this.gameState.value === 'lost')
+      return
     // 如果已经插旗子 或者 已经点开 不允许点开
     if (block.flagged || block.revealed)
       return
@@ -98,10 +102,21 @@ export class GamePlay {
       this.mineGenerated = true
     }
     block.revealed = true
-    if (block.mine)
+    if (block.mine) {
+      this.gameState.value = 'lost'
+      this.showAllMines()
       alert('BOOOM!')
+    }
 
     this.expandZero(block)
+  }
+
+  // 当点击到炸弹后 所有炸弹全部展示
+  showAllMines() {
+    this.state.value.flat().forEach((block) => {
+      if (block.mine && !block.revealed)
+        block.revealed = true
+    })
   }
 
   // 当点开的 块 一个炸弹都没有时 把周围不是炸弹的通通翻转
@@ -119,6 +134,8 @@ export class GamePlay {
 
   // 右键标记插旗子
   onRightClick(block: BlockState) {
+    if (this.gameState.value === 'lost')
+      return
     // 如果已经翻开 不允许插旗子
     if (block.revealed)
       return
@@ -133,8 +150,10 @@ export class GamePlay {
 
     const cheatstate = blocks.every((block: BlockState) => block.flagged)
 
-    if (cheatstate)
+    if (cheatstate) {
+      this.gameState.value = 'lost'
       alert('You cheat!')
+    }
 
     let gamestate = true
 
@@ -144,7 +163,9 @@ export class GamePlay {
         gamestate = false
     })
 
-    if (gamestate)
+    if (gamestate) {
+      this.gameState.value = 'won'
       alert('You Win!')
+    }
   }
 }

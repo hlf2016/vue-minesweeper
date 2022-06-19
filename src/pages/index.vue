@@ -6,6 +6,10 @@ import MineBlock from '~/components/MineBlock.vue'
 
 const play = new GamePlay(10, 10)
 const state = play.getState()
+
+watchEffect(() => {
+  play.checkGamestate()
+})
 </script>
 
 <template>
