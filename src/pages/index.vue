@@ -15,17 +15,21 @@ const WIDTH = 10;
 const HEIGHT = 10;
 
 // Array.from 接受的第一个参数是一个 具有 length 属性的对象
-const state = reactive(
-  Array.from({ length: HEIGHT }, (_, y) =>
+// reactive 无法实现整体替换 这里为了实现 重置 扫雷 改用 ref 实现
+const state = ref<BlockState[][]>([]);
+
+const reset = () => {
+  state.value = Array.from({ length: HEIGHT }, (_, y) =>
     Array.from({ length: WIDTH }, (_, x): BlockState => ({
       x, y, adjacentMines: 0, revealed: false
     })
     )
-  ));
+  )
+}
 
 // 生成炸弹
 const generateMines = (initBlock: BlockState) => {
-  for (const row of state) {
+  for (const row of state.value) {
     for (const block of row) {
       // 将首次点击的 block 作为 初始化 block
       // 特性： 1.首次点击必然不是炸弹 2.周围的 block 也必然不是炸弹
@@ -65,14 +69,14 @@ const getSiblings = (block: BlockState) => {
     if (x2 < 0 || y2 < 0 || x2 >= WIDTH || y2 >= HEIGHT) {
       return undefined;
     }
-    return state[y2][x2];
+    return state.value[y2][x2];
   }).filter(Boolean) as BlockState[];
 }
 
 // 计算非炸弹块的附近的炸弹块数目
 const updateNumbers = () => {
-  state.forEach((row, y) => {
-    row.forEach((block, x) => {
+  state.value.forEach((row: BlockState[]) => {
+    row.forEach((block) => {
       // 如果是炸弹块 则不计算
       if (block.mine) {
         return;
@@ -125,30 +129,31 @@ const onRightClick = (block: BlockState) => {
   block.flagged = !block.flagged;
 }
 
-watchEffect(checkGameState);
+reset();
+watchEffect(checkGamestate);
 
 // 判断是否胜利
-function checkGameState() {
-
+function checkGamestate() {
+  console.log(123);
   // 二维数组扁平化
-  const blocks = state.flat();
+  const blocks = state.value.flat();
 
-  let cheatState = blocks.every((block) => block.flagged);
+  let cheatstate = blocks.every((block: BlockState) => block.flagged);
 
-  if (cheatState) {
+  if (cheatstate) {
     alert('You cheat!');
   }
 
-  let gameState = true;
+  let gamestate = true;
 
-  blocks.forEach((block) => {
+  blocks.forEach((block: BlockState) => {
     // 判断 剩下的没翻开的块 如果有一块 不是炸弹 那就说明没有赢
     if (!block.revealed && !block.mine) {
-      gameState = false;
+      gamestate = false;
     }
   })
 
-  if (gameState) {
+  if (gamestate) {
     alert("You Win!");
   }
 }
