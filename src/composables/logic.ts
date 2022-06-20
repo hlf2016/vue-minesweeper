@@ -117,7 +117,7 @@ export class GamePlay {
   }
 
   onClick(block: BlockState) {
-    if (this.state.value.gameState === 'lost')
+    if (this.state.value.gameState !== 'playing')
       return
     // 如果已经插旗子 或者 已经点开 不允许点开
     if (block.flagged || block.revealed)
@@ -161,7 +161,7 @@ export class GamePlay {
 
   // 右键标记插旗子
   onRightClick(block: BlockState) {
-    if (this.state.value.gameState === 'lost')
+    if (this.state.value.gameState !== 'playing')
       return
     // 如果已经翻开 不允许插旗子
     if (block.revealed)
