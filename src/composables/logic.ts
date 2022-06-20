@@ -181,10 +181,8 @@ export class GamePlay {
 
   // 右键标记插旗子
   onRightClick(block: BlockState) {
-    if (this.state.value.gameState !== 'playing')
-      return
-    // 如果已经翻开 不允许插旗子
-    if (block.revealed)
+    // 如果已经翻开、未在游戏中、局面尚未生成 不允许插旗子
+    if (this.state.value.gameState !== 'playing' || block.revealed || !this.state.value.mineGenerated)
       return
 
     block.flagged = !block.flagged

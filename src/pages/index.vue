@@ -14,7 +14,7 @@ const restMineNum = computed(() => {
   if (!state.value.mineGenerated)
     return play.mines
 
-  return play.blocks.reduce((a, b) => a + (b.mine ? 1 : 0) - (b.flagged ? 1 : 0), 0)
+  return Math.max(play.blocks.reduce((a, b) => a + (b.mine ? 1 : 0) - (b.flagged ? 1 : 0), 0), 0)
 })
 
 // 游戏计时
