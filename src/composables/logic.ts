@@ -35,7 +35,26 @@ export class GamePlay {
     return this.state.value.board.flat()
   }
 
-  reset() {
+  // 生成不同难度的局
+  newGame(level: 'easy' | 'normal' | 'hard') {
+    switch (level) {
+      case 'easy':
+        this.reset(10, 10, 5)
+        break
+      case 'normal':
+        this.reset(10, 10, 20)
+        break
+      case 'hard':
+        this.reset(10, 10, 30)
+        break
+    }
+  }
+
+  reset(height: number = this.height, width: number = this.width, mines: number = this.mines) {
+    this.height = height
+    this.width = width
+    this.mines = mines
+
     this.state.value = {
       // 标识是否已经生成炸弹分布
       mineGenerated: false,
@@ -64,9 +83,7 @@ export class GamePlay {
       const block = this.state.value.board[y][x]
       // 将首次点击的 block 作为 初始化 block
       // 特性： 1.首次点击必然不是炸弹 2.周围的 block 也必然不是炸弹
-      if (Math.abs(initBlock.x - block.x) < 1)
-        return false
-      if (Math.abs(initBlock.y - block.y) < 1)
+      if (Math.abs(initBlock.x - block.x) <= 1 && Math.abs(initBlock.y - block.y) <= 1)
         return false
       // 防止 一个位置已经是炸弹 再次被生成炸弹 从而重复占位 浪费一个位置
       if (block.mine)
