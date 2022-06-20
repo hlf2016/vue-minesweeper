@@ -4,6 +4,7 @@ export interface GameState {
   board: BlockState[][]
   mineGenerated: boolean
   gameState: 'playing' | 'lost' | 'won'
+  startTime: number
 }
 
 export class GamePlay {
@@ -60,6 +61,8 @@ export class GamePlay {
       mineGenerated: false,
       // 游戏状态 play 、won 、lost
       gameState: 'playing',
+      // 游戏开始时间 当前时间  Date.now()  +Date.now() 当前时间的时间戳
+      startTime: +Date.now(),
       board: Array.from({ length: this.height }, (_, y) =>
         Array.from({ length: this.width }, (_, x): BlockState => ({
           x, y, adjacentMines: 0, revealed: false,
