@@ -4,7 +4,7 @@ import { isDev, toggleDev } from '~/composables'
 // 引入 扫雷块 组件
 import MineBlock from '~/components/MineBlock.vue'
 
-const play = new GamePlay(10, 10, 30)
+const play = new GamePlay(5, 5, 3)
 const state = useStorage('vue-minesweeper', play.getState())
 
 const board = computed(() => state.value.board)
@@ -39,5 +39,6 @@ watchEffect(() => {
         {{ isDev ? 'Dev' : 'Normal' }}
       </button>
     </div>
+    <Confetti :passed="play.state.value.gameState === 'won'" />
   </div>
 </template>

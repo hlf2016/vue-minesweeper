@@ -190,9 +190,7 @@ export class GamePlay {
         gamestate = false
     })
 
-    if (gamestate) {
+    if (gamestate)
       this.state.value.gameState = 'won'
-      alert('You Win!')
-    }
   }
 }
