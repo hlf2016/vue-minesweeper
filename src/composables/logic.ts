@@ -39,7 +39,7 @@ export class GamePlay {
   newGame(level: 'easy' | 'normal' | 'hard') {
     switch (level) {
       case 'easy':
-        this.reset(10, 10, 5)
+        this.reset(10, 10, 10)
         break
       case 'normal':
         this.reset(10, 10, 20)

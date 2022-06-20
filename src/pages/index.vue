@@ -4,7 +4,7 @@ import { isDev, toggleDev } from '~/composables'
 // 引入 扫雷块 组件
 import MineBlock from '~/components/MineBlock.vue'
 
-const play = new GamePlay(10, 10, 20)
+const play = new GamePlay(10, 10, 10)
 const state = useStorage('vue-minesweeper', play.getState())
 
 const board = computed(() => state.value.board)
