@@ -22,8 +22,8 @@ watchEffect(() => {
 <template>
   <div>
     Minesweeper
-    <div p5>
-      <div v-for="(row, y) in board" :key="y" flex="~" items-center justify-center>
+    <div p5 w-full overflow-auto>
+      <div v-for="(row, y) in board" :key="y" flex="~" items-center justify-center wmax ma>
         <mine-block v-for="(block, x) in row" :key="x" :block="block" @click="play.onClick(block)"
           @contextmenu.prevent="play.onRightClick(block)" />
       </div>

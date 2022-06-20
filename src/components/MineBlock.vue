@@ -29,7 +29,8 @@ const getBlockClass = (block: BlockState) => {
 </script>
 
 <template>
-  <button w-10 h-10 m="0.5" border="1 gray-400/10" :class="getBlockClass(block)" flex="~" items-center justify-center>
+  <button min-w-10 min-h-10 m="0.5" border="1 gray-400/10" :class="getBlockClass(block)" flex="~" items-center
+    justify-center>
     <template v-if="block.flagged">
       <div i-mdi-flag text-red />
     </template>
