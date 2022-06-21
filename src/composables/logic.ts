@@ -42,7 +42,7 @@ export class GamePlay {
   newGame(level: 'easy' | 'normal' | 'hard') {
     switch (level) {
       case 'easy':
-        this.reset(10, 10, 5)
+        this.reset(10, 10, 10)
         break
       case 'normal':
         this.reset(10, 10, 20)
@@ -161,7 +161,7 @@ export class GamePlay {
   showAllMines() {
     this.state.value.board.flat().forEach((block) => {
       if (block.mine && !block.revealed) {
-        // 翻出炸弹时 要把 旗子标志 给去掉 否则会遮挡
+        // 翻出炸弹时 要把 旗子标志 给去掉
         block.flagged = false
         block.revealed = true
       }
