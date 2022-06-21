@@ -1,10 +1,12 @@
 import type { BlockState } from '~/types'
 
+type GameStatus = 'playing' | 'lost' | 'won'
 export interface GameState {
   board: BlockState[][]
   mineGenerated: boolean
-  gameState: 'playing' | 'lost' | 'won'
+  status: GameStatus
   startTime: number
+  endTime?: number
 }
 
 export class GamePlay {
@@ -40,7 +42,7 @@ export class GamePlay {
   newGame(level: 'easy' | 'normal' | 'hard') {
     switch (level) {
       case 'easy':
-        this.reset(10, 10, 10)
+        this.reset(10, 10, 5)
         break
       case 'normal':
         this.reset(10, 10, 20)
@@ -60,7 +62,7 @@ export class GamePlay {
       // 标识是否已经生成炸弹分布
       mineGenerated: false,
       // 游戏状态 play 、won 、lost
-      gameState: 'playing',
+      status: 'playing',
       // 游戏开始时间 当前时间  Date.now()  +Date.now() 当前时间的时间戳
       startTime: +Date.now(),
       board: Array.from({ length: this.height }, (_, y) =>
@@ -137,7 +139,7 @@ export class GamePlay {
   }
 
   onClick(block: BlockState) {
-    if (this.state.value.gameState !== 'playing')
+    if (this.state.value.status !== 'playing')
       return
     // 如果已经插旗子 或者 已经点开 不允许点开
     if (block.flagged || block.revealed)
@@ -149,11 +151,8 @@ export class GamePlay {
       this.state.value.mineGenerated = true
     }
     block.revealed = true
-    if (block.mine) {
-      this.state.value.gameState = 'lost'
-      this.showAllMines()
-      alert('BOOOM!')
-    }
+    if (block.mine)
+      this.onGameOver('lost')
 
     this.expandZero(block)
   }
@@ -161,8 +160,11 @@ export class GamePlay {
   // 当点击到炸弹后 所有炸弹全部展示
   showAllMines() {
     this.state.value.board.flat().forEach((block) => {
-      if (block.mine && !block.revealed)
+      if (block.mine && !block.revealed) {
+        // 翻出炸弹时 要把 旗子标志 给去掉 否则会遮挡
+        block.flagged = false
         block.revealed = true
+      }
     })
   }
 
@@ -182,7 +184,7 @@ export class GamePlay {
   // 右键标记插旗子
   onRightClick(block: BlockState) {
     // 如果已经翻开、未在游戏中、局面尚未生成 不允许插旗子
-    if (this.state.value.gameState !== 'playing' || block.revealed || !this.state.value.mineGenerated)
+    if (this.state.value.status !== 'playing' || block.revealed || !this.state.value.mineGenerated)
       return
 
     block.flagged = !block.flagged
@@ -196,7 +198,7 @@ export class GamePlay {
     const cheatstate = blocks.every((block: BlockState) => block.flagged)
 
     if (cheatstate) {
-      this.state.value.gameState = 'lost'
+      this.state.value.status = 'lost'
       alert('You cheat!')
     }
 
@@ -204,12 +206,13 @@ export class GamePlay {
 
     blocks.forEach((block: BlockState) => {
       // 判断 剩下的没翻开的块 如果有一块 不是炸弹 那就说明没有赢
-      if (!block.revealed && !block.mine)
+      // 或者 所有的旗子标记中 存在非炸弹块 也没有赢
+      if ((!block.revealed && !block.mine) || (block.flagged && !block.mine))
         gamestate = false
     })
 
     if (gamestate)
-      this.state.value.gameState = 'won'
+      this.onGameOver('won')
   }
 
   // 当非炸弹格子周围的 旗子 数量 跟 其周围的炸弹个数相同时 可以翻开周围的格子
@@ -221,8 +224,12 @@ export class GamePlay {
     const flagsCount: number = siblings.filter(b => b.flagged).length
     if (flagsCount === block.adjacentMines) {
       siblings.forEach((b) => {
-        if (!b.revealed && !b.flagged)
+        if (!b.revealed && !b.flagged) {
           b.revealed = true
+          // 如果自动翻开的有炸弹 那就 输了
+          if (block.mine)
+            this.onGameOver('lost')
+        }
       })
     }
     // 非炸弹格子周围的 未翻开格子数量
@@ -233,5 +240,13 @@ export class GamePlay {
           b.flagged = true
       })
     }
+  }
+
+  onGameOver(status: GameStatus) {
+    this.state.value.status = status
+    // 将游戏结束时间设置为当前时间
+    this.state.value.endTime = +Date.now()
+    if (status === 'lost')
+      this.showAllMines()
   }
 }

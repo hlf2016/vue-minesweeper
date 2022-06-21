@@ -21,7 +21,7 @@ const restMineNum = computed(() => {
 // useNow() 返回当前时间 不断变化 且返回值是一个 ref 对象 此处使用 reactive transform 来进行 简化转换 从而在调用ref时省略 .value
 const nowTime = $(useNow())
 // 计算时间差 nowTime 是 object +nowTime 是时间戳
-const timeDiff = $computed(() => Math.floor((+nowTime - +state.value.startTime) / 1000))
+const timeDiff = $computed(() => Math.floor(((state.value.endTime || +nowTime) - +state.value.startTime) / 1000))
 
 watchEffect(() => {
   play.checkGamestate()
@@ -66,6 +66,6 @@ watchEffect(() => {
         {{ isDev ? 'Dev' : 'Play' }}
       </button>
     </div> -->
-    <Confetti :passed="play.state.value.gameState === 'won'" />
+    <Confetti :passed="play.state.value.status === 'won'" />
   </div>
 </template>
