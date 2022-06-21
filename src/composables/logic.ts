@@ -211,4 +211,27 @@ export class GamePlay {
     if (gamestate)
       this.state.value.gameState = 'won'
   }
+
+  // 当非炸弹格子周围的 旗子 数量 跟 其周围的炸弹个数相同时 可以翻开周围的格子
+  // 当双击时 如果 非炸弹格子周围 的炸弹数量 跟 未展开的 格子数量一样时 那未展开的格子必是炸弹 给炸弹格子自动标上 旗子
+  expandFlags(block: BlockState) {
+    const siblings = this.getSiblings(block)
+    // 非炸弹格子周围的 旗子 数量
+    // const flagsCount = siblings.reduce((a, b) => a + (b.flagged ? 1 : 0), 0)
+    const flagsCount: number = siblings.filter(b => b.flagged).length
+    if (flagsCount === block.adjacentMines) {
+      siblings.forEach((b) => {
+        if (!b.revealed && !b.flagged)
+          b.revealed = true
+      })
+    }
+    // 非炸弹格子周围的 未翻开格子数量
+    const unrevealedCount = siblings.filter(b => (!b.revealed && !b.flagged)).length
+    if ((block.adjacentMines - flagsCount) === unrevealedCount) {
+      siblings.forEach((b) => {
+        if (!b.revealed && !b.flagged)
+          b.flagged = true
+      })
+    }
+  }
 }

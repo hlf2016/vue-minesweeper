@@ -58,7 +58,7 @@ watchEffect(() => {
     <div p5 w-full overflow-auto>
       <div v-for="(row, y) in board" :key="y" flex="~" items-center justify-center wmax ma>
         <mine-block v-for="(block, x) in row" :key="x" :block="block" @click="play.onClick(block)"
-          @contextmenu.prevent="play.onRightClick(block)" />
+          @dblclick="play.expandFlags(block)" @contextmenu.prevent="play.onRightClick(block)" />
       </div>
     </div>
     <!-- <div flex="~ gap-1" justify-center>
